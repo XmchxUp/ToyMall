@@ -75,3 +75,38 @@ func (s UserService) Register(ctx context.Context) serializer.Response {
 		Msg:    e.GetMsg(code),
 	}
 }
+
+func (s UserService) Login(ctx context.Context) serializer.Response {
+	code := e.SUCCESS
+	userDao := dao.NewUserDao(ctx)
+	user, exist, err := userDao.ExistOrNotByUserName(s.UserName)
+	if !exist {
+		logging.Info(err)
+		code = e.ErrorNotExistUser
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	if !user.CheckPassword(s.Password) {
+		code = e.ErrorNotCompare
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	token, err := utils.GenerateToken(user.ID, s.UserName, 0)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorAuthToken
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.TokenData{User: serializer.MakeUser(user), Token: token},
+		Msg:    e.GetMsg(code),
+	}
+}

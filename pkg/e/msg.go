@@ -10,6 +10,8 @@ var MsgFlags = map[int]string{
 	ErrorExistUser:      "已存在该用户名",
 	ErrorNotExistUser:   "该用户不存在",
 	ErrorFailEncryption: "加密失败",
+	ErrorNotCompare:     "密码不匹配",
+	ErrorAuthToken:      "token生成失败",
 
 	ErrorDatabase: "数据库操作出错,请重试",
 }

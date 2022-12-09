@@ -34,7 +34,3 @@ func (user *User) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordDigest), []byte(password))
 	return err == nil
 }
-
-func (user *User) AvatarURL() string {
-	return user.Avatar
-}

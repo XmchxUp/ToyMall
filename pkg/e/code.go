@@ -10,6 +10,9 @@ const (
 	ErrorExistUser      = 10001
 	ErrorNotExistUser   = 10002
 	ErrorFailEncryption = 10003
+	ErrorNotCompare     = 10004
+
+	ErrorAuthToken = 20001
 
 	ErrorDatabase = 40001
 )
