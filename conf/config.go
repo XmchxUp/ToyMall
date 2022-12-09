@@ -5,6 +5,7 @@ import (
 	"strings"
 	"xm-mall/dao"
 
+	logging "github.com/sirupsen/logrus"
 	"gopkg.in/ini.v1"
 )
 
@@ -39,6 +40,11 @@ func Init() {
 	LoadMysqlConfig(file)
 	LoadEmailConfig(file)
 	LoadPhotoPathConfig(file)
+
+	if err := LoadLocales("conf/locales/zh-cn.yaml"); err != nil {
+		logging.Info(err) //日志内容
+		panic(err)
+	}
 
 	mysqlReadPath := strings.Join([]string{DbUser, ":", DbPassWord, "@tcp(", DbHost, ":", DbPort, ")/", DbName, "?charset=utf8&parseTime=true"}, "")
 	mysqlWritePath := strings.Join([]string{DbUser, ":", DbPassWord, "@tcp(", DbHost, ":", DbPort, ")/", DbName, "?charset=utf8&parseTime=true"}, "")
