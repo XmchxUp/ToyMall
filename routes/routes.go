@@ -28,7 +28,9 @@ func NewRouter() *gin.Engine {
 
 		authed := v1.Group("/")
 		authed.Use(middleware.JWT())
-		{	authed.PUT("user", api.UserUpdate)
+		{
+			authed.PUT("user", api.UserUpdate)
+			authed.POST("avatar", api.UploadAvatar)
 		}
 	}
 	return r

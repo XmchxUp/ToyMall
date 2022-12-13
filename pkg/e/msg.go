@@ -17,6 +17,8 @@ var MsgFlags = map[int]string{
 	ErrorAuthCheckTokenTimeout: "token已超时",
 
 	ErrorDatabase: "数据库操作出错,请重试",
+
+	ErrorUploadFile: "文件上传失败",
 }
 
 // GetMsg 获取状态码对应信息

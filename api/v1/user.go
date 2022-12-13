@@ -7,6 +7,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func UploadAvatar(c *gin.Context) {
+	var s service.UserService
+	file, fileHeader, _ := c.Request.FormFile("file")
+	claims, _ := utils.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&s); err == nil {
+		res := s.Post(c.Request.Context(), claims.ID, file, fileHeader.Size)
+		c.JSON(200, res)
+	} else {
+		c.JSON(400, ErrorResponse(err))
+		utils.LogrusObj.Infoln(err)
+	}
+}
+
 func UserUpdate(c *gin.Context) {
 	var s service.UserService
 	claims, _ := utils.ParseToken(c.GetHeader("Authorization"))

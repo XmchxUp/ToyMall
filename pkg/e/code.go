@@ -16,6 +16,7 @@ const (
 	ErrorAuthCheckTokenFail    = 20002
 	ErrorAuthCheckTokenTimeout = 20003
 
-
 	ErrorDatabase = 40001
+
+	ErrorUploadFile = 50001
 )

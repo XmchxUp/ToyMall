@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"mime/multipart"
 	"xm-mall/dao"
 	"xm-mall/model"
 	"xm-mall/pkg/e"
@@ -16,6 +17,52 @@ type UserService struct {
 	UserName string `form:"user_name" json:"user_name"`
 	Password string `form:"password" json:"password"`
 	Key      string `form:"key" json:"key"` // 前端进行验证
+}
+
+func (s UserService) Post(ctx context.Context, uId uint, file multipart.File, fileSize int64) serializer.Response {
+	code := e.SUCCESS
+	var user *model.User
+	var err error
+
+	userDao := dao.NewUserDao(ctx)
+	user, err = userDao.GetUserById(uId)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	path, err := UploadAvatarToLocaleStatic(file, uId, user.UserName)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorUploadFile
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	user.Avatar = path
+	err = userDao.UpdateUserById(uId, user)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.MakeUser(user),
+		Msg:    e.GetMsg(code),
+	}
 }
 
 func (s UserService) Update(ctx context.Context, uId uint) serializer.Response {
