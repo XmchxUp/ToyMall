@@ -18,6 +18,42 @@ type UserService struct {
 	Key      string `form:"key" json:"key"` // 前端进行验证
 }
 
+func (s UserService) Update(ctx context.Context, uId uint) serializer.Response {
+	var user *model.User
+	var err error
+	code := e.SUCCESS
+	userDao := dao.NewUserDao(ctx)
+	user, err = userDao.GetUserById(uId)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	if s.NickName != "" {
+		user.NickName = s.NickName
+	}
+	err = userDao.UpdateUserById(uId, user)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.MakeUser(user),
+		Msg:    e.GetMsg(code),
+	}
+}
+
 func (s UserService) Register(ctx context.Context) serializer.Response {
 	var user *model.User
 	code := e.SUCCESS

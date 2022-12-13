@@ -12,7 +12,10 @@ const (
 	ErrorFailEncryption = 10003
 	ErrorNotCompare     = 10004
 
-	ErrorAuthToken = 20001
+	ErrorAuthToken             = 20001
+	ErrorAuthCheckTokenFail    = 20002
+	ErrorAuthCheckTokenTimeout = 20003
+
 
 	ErrorDatabase = 40001
 )

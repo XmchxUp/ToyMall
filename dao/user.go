@@ -19,6 +19,16 @@ func NewUserDaoByDB(db *gorm.DB) *UserDao {
 	return &UserDao{db}
 }
 
+func (dao *UserDao) UpdateUserById(id uint, user *model.User) (err error) {
+	err = dao.DB.Model(&model.User{}).Where("id=?", id).Updates(&user).Error
+	return
+}
+
+func (dao *UserDao) GetUserById(id uint) (user *model.User, err error) {
+	err = dao.DB.Model(&model.User{}).Where("id=?", id).First(&user).Error
+	return
+}
+
 func (dao *UserDao) ExistOrNotByUserName(userName string) (user *model.User, exist bool, err error) {
 	var count int64
 	err = dao.DB.Model(&model.User{}).Where("user_name=?", userName).

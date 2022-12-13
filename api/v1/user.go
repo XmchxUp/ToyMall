@@ -7,6 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func UserUpdate(c *gin.Context) {
+	var s service.UserService
+	claims, _ := utils.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&s); err == nil {
+		res := s.Update(c.Request.Context(), claims.ID)
+		c.JSON(200, res)
+	} else {
+		c.JSON(400, ErrorResponse(err))
+		utils.LogrusObj.Infoln(err)
+	}
+}
+
 func UserRegister(c *gin.Context) {
 	var s service.UserService
 	if err := c.ShouldBind(&s); err == nil {
