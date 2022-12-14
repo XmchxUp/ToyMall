@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"mime/multipart"
+	"strings"
+	"xm-mall/conf"
 	"xm-mall/dao"
 	"xm-mall/model"
 	"xm-mall/pkg/e"
@@ -10,6 +12,7 @@ import (
 	"xm-mall/serializer"
 
 	logging "github.com/sirupsen/logrus"
+	"gopkg.in/mail.v2"
 )
 
 type UserService struct {
@@ -17,6 +20,13 @@ type UserService struct {
 	UserName string `form:"user_name" json:"user_name"`
 	Password string `form:"password" json:"password"`
 	Key      string `form:"key" json:"key"` // 前端进行验证
+}
+
+type SendEmailService struct {
+	Email    string `form:"email" json:"email"`
+	Password string `form:"password" json:"password"`
+	//OpertionType 1:绑定邮箱 2：解绑邮箱 3：改密码
+	OperationType uint `form:"operation_type" json:"operation_type"`
 }
 
 func (s UserService) Post(ctx context.Context, uId uint, file multipart.File, fileSize int64) serializer.Response {
@@ -190,6 +200,60 @@ func (s UserService) Login(ctx context.Context) serializer.Response {
 	return serializer.Response{
 		Status: code,
 		Data:   serializer.TokenData{User: serializer.MakeUser(user), Token: token},
+		Msg:    e.GetMsg(code),
+	}
+}
+
+func (s *SendEmailService) Send(ctx context.Context, uId uint) serializer.Response {
+	var address string
+	var notice *model.Notice
+	var code = e.SUCCESS
+
+	token, err := utils.GenerateEmailToken(uId, s.OperationType, s.Email, s.Password)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorAuthToken
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+
+	}
+
+	noticeDao := dao.NewNoticeDao(ctx)
+	notice, err = noticeDao.GetNoticeById(s.OperationType)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+
+	address = conf.ValidEmail + token
+	mailTxt := strings.Replace(notice.Text, "Email", address, -1)
+	m := mail.NewMessage()
+	m.SetHeader("From", conf.SmtpEmail)
+	m.SetHeader("To", s.Email)
+	m.SetHeader("Subject", "Tesla")
+	m.SetBody("text/html", mailTxt)
+
+	d := mail.NewDialer(conf.SmtpHost, 465, conf.SmtpEmail, conf.SmtpPass)
+	d.StartTLSPolicy = mail.MandatoryStartTLS
+	if err := d.DialAndSend(m); err != nil {
+		logging.Info(err)
+		code = e.ErrorSendEmail
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
 		Msg:    e.GetMsg(code),
 	}
 }

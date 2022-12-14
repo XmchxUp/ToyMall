@@ -11,6 +11,7 @@ const (
 	ErrorNotExistUser   = 10002
 	ErrorFailEncryption = 10003
 	ErrorNotCompare     = 10004
+	ErrorSendEmail      = 10005
 
 	ErrorAuthToken             = 20001
 	ErrorAuthCheckTokenFail    = 20002

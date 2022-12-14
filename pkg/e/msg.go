@@ -11,6 +11,7 @@ var MsgFlags = map[int]string{
 	ErrorNotExistUser:   "该用户不存在",
 	ErrorFailEncryption: "加密失败",
 	ErrorNotCompare:     "密码不匹配",
+	ErrorSendEmail:      "发送邮件失败",
 
 	ErrorAuthToken:             "token生成失败",
 	ErrorAuthCheckTokenFail:    "token鉴权失败",

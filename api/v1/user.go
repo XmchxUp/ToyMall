@@ -7,6 +7,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func SendEmail(c *gin.Context) {
+	var s service.SendEmailService
+	claims, _ := utils.ParseToken(c.GetHeader("Authorization"))
+	if err := c.ShouldBind(&s); err == nil {
+		res := s.Send(c.Request.Context(), claims.ID)
+		c.JSON(200, res)
+	} else {
+		c.JSON(400, ErrorResponse(err))
+		utils.LogrusObj.Infoln(err)
+	}
+}
+
 func UploadAvatar(c *gin.Context) {
 	var s service.UserService
 	file, fileHeader, _ := c.Request.FormFile("file")
