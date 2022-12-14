@@ -4,6 +4,7 @@ import (
 	"context"
 	"mime/multipart"
 	"strings"
+	"time"
 	"xm-mall/conf"
 	"xm-mall/dao"
 	"xm-mall/model"
@@ -27,6 +28,9 @@ type SendEmailService struct {
 	Password string `form:"password" json:"password"`
 	//OpertionType 1:绑定邮箱 2：解绑邮箱 3：改密码
 	OperationType uint `form:"operation_type" json:"operation_type"`
+}
+
+type ValidEmailService struct {
 }
 
 func (s UserService) Post(ctx context.Context, uId uint, file multipart.File, fileSize int64) serializer.Response {
@@ -255,5 +259,74 @@ func (s *SendEmailService) Send(ctx context.Context, uId uint) serializer.Respon
 	return serializer.Response{
 		Status: code,
 		Msg:    e.GetMsg(code),
+	}
+}
+
+func (s *ValidEmailService) Valid(ctx context.Context, token string) serializer.Response {
+	var userID uint
+	var email string
+	var password string
+	var operationType uint
+	code := e.SUCCESS
+
+	if token == "" {
+		code = e.InvalidParams
+	} else {
+		claims, err := utils.ParseEmailToken(token)
+		if err != nil {
+			logging.Info(err)
+			code = e.ErrorAuthCheckTokenFail
+		} else if time.Now().Unix() > claims.ExpiresAt {
+			code = e.ErrorAuthCheckTokenTimeout
+		} else {
+			userID = claims.UserID
+			email = claims.Email
+			password = claims.Password
+			operationType = claims.OperationType
+		}
+	}
+	if code != e.SUCCESS {
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	userDao := dao.NewUserDao(ctx)
+	user, err := userDao.GetUserById(userID)
+	if err != nil {
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+
+	if operationType == 1 { // 绑定邮箱
+		user.Email = email
+	} else if operationType == 2 { // 解绑邮箱
+		user.Email = ""
+	} else if operationType == 3 { // 修改密码
+		err := user.SetPassword(password)
+		if err != nil {
+			code = e.ErrorDatabase
+			return serializer.Response{
+				Status: code,
+				Msg:    e.GetMsg(code),
+			}
+		}
+	}
+	err = userDao.UpdateUserById(userID, user)
+	if err != nil {
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+		Data:   serializer.MakeUser(user),
 	}
 }

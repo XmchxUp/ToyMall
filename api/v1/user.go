@@ -7,6 +7,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func ValidEmail(c *gin.Context) {
+	var s service.ValidEmailService
+	if err := c.ShouldBind(&s); err == nil {
+		res := s.Valid(c.Request.Context(), c.GetHeader("Authorization"))
+		c.JSON(200, res)
+	} else {
+		c.JSON(400, ErrorResponse(err))
+		utils.LogrusObj.Infoln(err)
+	}
+}
+
 func SendEmail(c *gin.Context) {
 	var s service.SendEmailService
 	claims, _ := utils.ParseToken(c.GetHeader("Authorization"))
