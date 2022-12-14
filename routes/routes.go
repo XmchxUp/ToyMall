@@ -34,6 +34,7 @@ func NewRouter() *gin.Engine {
 			authed.POST("user/sending-email", api.SendEmail)
 			authed.POST("user/valid-email", api.ValidEmail)
 
+			authed.POST("money", api.ShowMoney)
 		}
 	}
 	return r
