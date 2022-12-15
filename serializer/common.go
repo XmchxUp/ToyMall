@@ -11,3 +11,19 @@ type TokenData struct {
 	User  interface{} `json:"user"`
 	Token string      `json:"token"`
 }
+
+type DataList struct {
+	Items interface{} `json:"items"`
+	Total uint        `json:"total"`
+}
+
+func BuildListResponse(items interface{}, total uint) Response {
+	return Response{
+		Status: 200,
+		Data: DataList{
+			Items: items,
+			Total: total,
+		},
+		Msg: "ok",
+	}
+}
