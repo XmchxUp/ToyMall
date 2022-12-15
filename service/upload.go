@@ -9,6 +9,25 @@ import (
 	"xm-mall/conf"
 )
 
+func UploadProductToLocaleStatic(file multipart.File, uId uint, productName string) (filePath string, err error) {
+	aId := strconv.Itoa(int(uId))
+	basePath := "." + conf.ProductPhotoPath + "boss" + aId + "/"
+	if !ExistDir(basePath) {
+		CreateDir(basePath)
+	}
+	avatarPath := basePath + productName + ".jpg"
+	content, err := io.ReadAll(file)
+	if err != nil {
+		return "", err
+	}
+	err = os.WriteFile(avatarPath, content, 0666)
+	if err != nil {
+		return "", err
+
+	}
+	return "boss" + aId + "/" + productName + ".jpg", err
+}
+
 func UploadAvatarToLocaleStatic(file multipart.File, uId uint, userName string) (filePath string, err error) {
 	aId := strconv.Itoa(int(uId))
 	basePath := "." + conf.AvatarPath + "user" + aId + "/"
