@@ -34,3 +34,10 @@ func (dao *ProductDao) CountProductByCondition(condition map[string]interface{})
 	err = dao.DB.Model(&model.Product{}).Where(condition).Count(&total).Error
 	return
 }
+
+func (dao *ProductDao) SearchProduct(info string, page model.BasePage) (products []*model.Product, err error) {
+	err = dao.DB.Model(&model.Product{}).
+		Where("name LIKE ? OR info LIKE ?", "%"+info+"%", "%"+info+"%").
+		Limit(page.PageSize).Find(&products).Error
+	return
+}

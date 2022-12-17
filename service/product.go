@@ -9,6 +9,8 @@ import (
 	"xm-mall/model"
 	"xm-mall/pkg/e"
 	"xm-mall/serializer"
+
+	logging "github.com/sirupsen/logrus"
 )
 
 type ProductService struct {
@@ -28,6 +30,31 @@ type ProductService struct {
 type ListProductService struct {
 	CategoryID int `form:"category_id" json:"category_id"`
 	model.BasePage
+}
+
+type SearchProductService struct {
+	Info string `form:"info" json:"info" binding:"max=1000"`
+	model.BasePage
+}
+
+func (s *SearchProductService) Search(ctx context.Context) serializer.Response {
+	code := e.SUCCESS
+	if s.PageSize == 0 {
+		s.PageSize = 15
+	}
+
+	productDao := dao.NewProductDao(ctx)
+	products, err := productDao.SearchProduct(s.Info, s.BasePage)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.BuildListResponse(serializer.BuildProducts(products), uint(len(products)))
 }
 
 func (s *ListProductService) List(ctx context.Context) serializer.Response {
