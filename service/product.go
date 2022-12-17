@@ -40,6 +40,60 @@ type SearchProductService struct {
 	model.BasePage
 }
 
+// 删除商品
+func (service *ProductService) Delete(ctx context.Context, pId string) serializer.Response {
+	code := e.SUCCESS
+
+	productDao := dao.NewProductDao(ctx)
+	productId, _ := strconv.Atoi(pId)
+	err := productDao.DeleteProduct(uint(productId))
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+	}
+}
+
+// 更新商品
+func (service *ProductService) Update(ctx context.Context, pId string) serializer.Response {
+	code := e.SUCCESS
+	productDao := dao.NewProductDao(ctx)
+
+	productId, _ := strconv.Atoi(pId)
+	product := &model.Product{
+		Name:          service.Name,
+		CategoryID:    uint(service.CategoryID),
+		Title:         service.Title,
+		Info:          service.Info,
+		ImgPath:       service.ImgPath,
+		Price:         service.Price,
+		DiscountPrice: service.DiscountPrice,
+		OnSale:        service.OnSale,
+	}
+	err := productDao.UpdateProduct(uint(productId), product)
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Msg:    e.GetMsg(code),
+	}
+}
+
 func (s *ListProductImgService) List(ctx context.Context, pId string) serializer.Response {
 	productImgDao := dao.NewProductImgDao(ctx)
 	productId, _ := strconv.Atoi(pId)

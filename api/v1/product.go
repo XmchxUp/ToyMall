@@ -7,6 +7,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func UpdateProduct(c *gin.Context) {
+	s := service.ProductService{}
+	if err := c.ShouldBind(&s); err == nil {
+		res := s.Update(c.Request.Context(), c.Param("id"))
+		c.JSON(200, res)
+	} else {
+		c.JSON(400, ErrorResponse(err))
+		utils.LogrusObj.Infoln(err)
+	}
+}
+
+func DeleteProduct(c *gin.Context) {
+	s := service.ProductService{}
+	res := s.Delete(c.Request.Context(), c.Param("id"))
+	c.JSON(200, res)
+}
+
 func ListProductImg(c *gin.Context) {
 	s := service.ListProductImgService{}
 	if err := c.ShouldBind(&s); err == nil {

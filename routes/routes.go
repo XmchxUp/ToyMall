@@ -44,6 +44,8 @@ func NewRouter() *gin.Engine {
 			authed.POST("money", api.ShowMoney)
 
 			authed.POST("product", api.CreateProduct)
+			authed.PUT("product/:id", api.UpdateProduct)
+			authed.DELETE("product/:id", api.DeleteProduct)
 		}
 	}
 	return r
