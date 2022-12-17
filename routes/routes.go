@@ -30,6 +30,7 @@ func NewRouter() *gin.Engine {
 		v1.GET("products", api.ListProducts)
 		v1.POST("products", api.SearchProducts)
 		v1.GET("product/:id", api.ShowProduct)
+		v1.GET("imgs/:id", api.ListProductImg)
 
 		authed := v1.Group("/")
 		authed.Use(middleware.JWT())

@@ -32,9 +32,19 @@ type ListProductService struct {
 	model.BasePage
 }
 
+type ListProductImgService struct {
+}
+
 type SearchProductService struct {
 	Info string `form:"info" json:"info" binding:"max=1000"`
 	model.BasePage
+}
+
+func (s *ListProductImgService) List(ctx context.Context, pId string) serializer.Response {
+	productImgDao := dao.NewProductImgDao(ctx)
+	productId, _ := strconv.Atoi(pId)
+	productImgs, _ := productImgDao.ListProductImgByProductId(uint(productId))
+	return serializer.BuildListResponse(serializer.BuildProductImgs(productImgs), uint(len(productImgs)))
 }
 
 func (s *ProductService) Show(ctx context.Context, id string) serializer.Response {
