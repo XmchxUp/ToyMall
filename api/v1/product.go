@@ -7,6 +7,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func ShowProduct(c *gin.Context) {
+	s := service.ProductService{}
+	res := s.Show(c.Request.Context(), c.Param("id"))
+	c.JSON(200, res)
+}
+
 func SearchProducts(c *gin.Context) {
 	s := service.SearchProductService{}
 	if err := c.ShouldBind(&s); err == nil {

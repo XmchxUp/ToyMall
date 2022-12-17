@@ -37,6 +37,29 @@ type SearchProductService struct {
 	model.BasePage
 }
 
+func (s *ProductService) Show(ctx context.Context, id string) serializer.Response {
+	code := e.SUCCESS
+
+	pId, _ := strconv.Atoi(id)
+
+	productDao := dao.NewProductDao(ctx)
+	product, err := productDao.GetProductById(uint(pId))
+	if err != nil {
+		logging.Info(err)
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+			Error:  err.Error(),
+		}
+	}
+	return serializer.Response{
+		Status: code,
+		Data:   serializer.BuildProduct(product),
+		Msg:    e.GetMsg(code),
+	}
+}
+
 func (s *SearchProductService) Search(ctx context.Context) serializer.Response {
 	code := e.SUCCESS
 	if s.PageSize == 0 {
