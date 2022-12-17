@@ -25,6 +25,45 @@ type ProductService struct {
 	model.BasePage
 }
 
+type ListProductService struct {
+	CategoryID int `form:"category_id" json:"category_id"`
+	model.BasePage
+}
+
+func (s *ListProductService) List(ctx context.Context) serializer.Response {
+	var products []*model.Product
+	var total int64
+	code := e.SUCCESS
+
+	if s.PageSize == 0 {
+		s.PageSize = 15
+	}
+
+	condition := make(map[string]interface{})
+	if s.CategoryID != 0 {
+		condition["category_id"] = s.CategoryID
+	}
+
+	productDao := dao.NewProductDao(ctx)
+	total, err := productDao.CountProductByCondition(condition)
+	if err != nil {
+		code = e.ErrorDatabase
+		return serializer.Response{
+			Status: code,
+			Msg:    e.GetMsg(code),
+		}
+	}
+	wg := new(sync.WaitGroup)
+	wg.Add(1)
+	go func() {
+		productDao = dao.NewProductDaoByDB(productDao.DB)
+		products, _ = productDao.ListProductByCondition(condition, s.BasePage)
+		wg.Done()
+	}()
+	wg.Wait()
+	return serializer.BuildListResponse(serializer.BuildProducts(products), uint(total))
+}
+
 func (s *ProductService) Create(ctx context.Context, uId uint, files []*multipart.FileHeader) serializer.Response {
 	var boss *model.User
 	var err error

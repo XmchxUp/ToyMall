@@ -7,6 +7,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func ListProducts(c *gin.Context) {
+	s := service.ListProductService{}
+	if err := c.ShouldBind(&s); err == nil {
+		res := s.List(c.Request.Context())
+		c.JSON(200, res)
+	} else {
+		c.JSON(400, ErrorResponse(err))
+		utils.LogrusObj.Infoln(err)
+	}
+}
+
 func CreateProduct(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["file"]
